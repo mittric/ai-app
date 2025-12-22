@@ -3,6 +3,6 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "env": {
-    "VITE_API_URL": "https://your-render-backend-url.onrender.com"
+    "VITE_API_URL": "https://ai-app-backend-n904.onrender.com"
   }
 }
