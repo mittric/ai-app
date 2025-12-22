@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { fetchFromApi } from './config';
 
 function App() {
   const [activeTab, setActiveTab] = useState('players');
@@ -81,7 +82,7 @@ function PlayersTab() {
 
   const loadPlayers = async () => {
     try {
-      const response = await fetch('/api/players');
+      const response = await fetchFromApi('/api/players');
       if (response.ok) {
         const data = await response.json();
         setPlayers(data);
@@ -107,7 +108,7 @@ function PlayersTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/players', {
+      const response = await fetchFromApi('/api/players', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newPlayerName.trim() })
@@ -134,7 +135,7 @@ function PlayersTab() {
 
     setError('');
     try {
-      const response = await fetch(`/api/players/${id}`, { method: 'DELETE' });
+      const response = await fetchFromApi(`/api/players/${id}`, { method: 'DELETE' });
       if (response.ok) {
         await loadPlayers();
       } else {
@@ -232,7 +233,7 @@ function TournamentsTab() {
 
   const loadTournaments = async () => {
     try {
-      const response = await fetch('/api/tournaments');
+      const response = await fetchFromApi('/api/tournaments');
       if (response.ok) {
         const data = await response.json();
         setTournaments(data);
@@ -258,7 +259,7 @@ function TournamentsTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/tournaments', {
+      const response = await fetchFromApi('/api/tournaments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newTournament)
@@ -284,7 +285,7 @@ function TournamentsTab() {
     }
 
     try {
-      const response = await fetch(`/api/tournaments/${id}`, { method: 'DELETE' });
+      const response = await fetchFromApi(`/api/tournaments/${id}`, { method: 'DELETE' });
       if (response.ok) {
         await loadTournaments();
       } else {
@@ -426,8 +427,8 @@ function GamesTab() {
     setLoading(true);
     try {
       const [gamesRes, scoresRes] = await Promise.all([
-        fetch(`/api/tournaments/${tournamentId}/games`),
-        fetch(`/api/tournaments/${tournamentId}/scores`)
+        fetchFromApi(`/api/tournaments/${tournamentId}/games`),
+        fetchFromApi(`/api/tournaments/${tournamentId}/scores`)
       ]);
       
       if (gamesRes.ok && scoresRes.ok) {
@@ -458,7 +459,7 @@ function GamesTab() {
 
   const handleUpdateGame = async (gameId, winnerPairingId) => {
     try {
-      const response = await fetch(`/api/games/${gameId}`, {
+      const response = await fetchFromApi(`/api/games/${gameId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ winner_pairing_id: winnerPairingId })
@@ -639,7 +640,7 @@ function StatisticsTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`/api/statistics/yearly/${year}`);
+      const response = await fetchFromApi(`/api/statistics/yearly/${year}`);
       if (response.ok) {
         const data = await response.json();
         setYearlyScores(data);
@@ -657,7 +658,7 @@ function StatisticsTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`/api/statistics/player/${playerId}/yearly/${year}`);
+      const response = await fetchFromApi(`/api/statistics/player/${playerId}/yearly/${year}`);
       if (response.ok) {
         const data = await response.json();
         setPlayerDetails(data);
