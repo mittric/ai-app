@@ -9,4 +9,4 @@ services:
       - key: DATABASE_URL
         value: sqlite:///./app.db
       - key: CORS_ORIGINS
-        value: https://your-vercel-domain.vercel.app,http://localhost:5173
+        value: https://ai-app-five-nu.vercel.app,http://localhost:5173
