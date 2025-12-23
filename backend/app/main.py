@@ -16,7 +16,7 @@ app = FastAPI(title="Kartenspiel-Turnierverwaltung API")
 # CORS-Konfiguration: Dynamisch aus Umgebungsvariable oder Standardwerte
 cors_origins_raw = os.environ.get(
     "CORS_ORIGINS",
-    "http://localhost:5173,http://localhost:5174"
+    "https://ai-app-five-nu.vercel.app,http://localhost:5174"
 )
 # Trim whitespace and remove empty entries to avoid accidental mismatches
 cors_origins = [o.strip() for o in cors_origins_raw.split(",") if o.strip()]
