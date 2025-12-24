@@ -272,6 +272,25 @@ function TournamentsTab() {
     }
   };
 
+
+  const handleDeleteTournament = async (id) => {
+    if (!window.confirm('Möchtest du dieses Turnier wirklich löschen? Alle zugehörigen Spiele und Ergebnisse gehen verloren!')) {
+      return;
+    }
+
+    try {
+      const response = await fetchFromApi(`/api/tournaments/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        await loadTournaments(); // Liste neu laden
+      } else {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.detail || 'Fehler beim Löschen des Turniers');
+      }
+    } catch (err) {
+      setError(err.message || 'Netzwerkfehler beim Löschen des Turniers.');
+    }
+  };
+
   const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
   return (
@@ -335,18 +354,23 @@ function TournamentsTab() {
                 border: '1px solid #ddd'
               }}
             >
-              <h4>{tournament.name} ({tournament.month} / {tournament.year})</h4>
-              <div style={{ marginTop: 10 }}>
-                <strong>Paarungen:</strong>
-                <ul style={{ marginTop: 5 }}>
-                  {tournament.pairings.map((pairing) => (
-                    <li key={pairing.id}>
-                      {pairing.player1_name} &amp; {pairing.player2_name}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ margin: 0 }}>{tournament.name} ({tournament.month} / {tournament.year})</h4>
+                <button
+                  onClick={() => handleDeleteTournament(tournament.id)}
+                  style={{
+                    padding: '5px 10px',
+                    backgroundColor: '#f44336',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: 4,
+                    cursor: 'pointer'
+                }}
+              >
+              Turnier löschen
+            </button>
+          </div>
+          </div>
           ))
         )}
       </div>
