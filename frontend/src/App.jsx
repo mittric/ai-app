@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+// Importiere die API-Hilfsfunktionen aus deiner config.js
+// ...
+import { fetchFromApi } from './config';
 
 function App() {
   const [activeTab, setActiveTab] = useState('players');
@@ -81,7 +84,7 @@ function PlayersTab() {
 
   const loadPlayers = async () => {
     try {
-      const response = await fetch('/api/players');
+      const response = await fetchFromApi('/api/players');
       if (response.ok) {
         const data = await response.json();
         setPlayers(data);
@@ -94,7 +97,7 @@ function PlayersTab() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadPlayers();
   }, []);
 
@@ -107,7 +110,7 @@ function PlayersTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/players', {
+      const response = await fetchFromApi('/api/players', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newPlayerName.trim() })
@@ -133,7 +136,7 @@ function PlayersTab() {
     }
 
     try {
-      const response = await fetch(`/api/players/${id}`, { method: 'DELETE' });
+      const response = await fetchFromApi(`/api/players/${id}`, { method: 'DELETE' });
       if (response.ok) {
         await loadPlayers();
       } else {
@@ -223,7 +226,7 @@ function TournamentsTab() {
 
   const loadTournaments = async () => {
     try {
-      const response = await fetch('/api/tournaments');
+      const response = await fetchFromApi('/api/tournaments');
       if (response.ok) {
         const data = await response.json();
         setTournaments(data);
@@ -236,7 +239,7 @@ function TournamentsTab() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadTournaments();
   }, []);
 
@@ -249,7 +252,7 @@ function TournamentsTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch('/api/tournaments', {
+      const response = await fetchFromApi('/api/tournaments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newTournament)
@@ -359,9 +362,9 @@ function GamesTab({ isActive }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const loadTournaments = async () => {
+  const loadTournamentsList = async () => {
     try {
-      const response = await fetch('/api/tournaments');
+      const response = await fetchFromApi('/api/tournaments');
       if (response.ok) {
         const data = await response.json();
         setTournaments(data);
@@ -374,14 +377,14 @@ function GamesTab({ isActive }) {
     }
   };
 
-  const loadGames = async (tournamentId) => {
+  const loadGamesData = async (tournamentId) => {
     if (!tournamentId) return;
     
     setLoading(true);
     try {
       const [gamesRes, scoresRes] = await Promise.all([
-        fetch(`/api/tournaments/${tournamentId}/games`),
-        fetch(`/api/tournaments/${tournamentId}/scores`)
+        fetchFromApi(`/api/tournaments/${tournamentId}/games`),
+        fetchFromApi(`/api/tournaments/${tournamentId}/scores`)
       ]);
       
       if (gamesRes.ok && scoresRes.ok) {
@@ -402,29 +405,28 @@ function GamesTab({ isActive }) {
     }
   };
 
-  React.useEffect(() => {
-    // Beim ersten Mount und jedes Mal, wenn der Tab aktiv wird, Turniere laden
+  useEffect(() => {
     if (isActive) {
-      loadTournaments();
+      loadTournamentsList();
     }
   }, [isActive]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (selectedTournament) {
-      loadGames(selectedTournament);
+      loadGamesData(selectedTournament);
     }
   }, [selectedTournament]);
 
   const handleUpdateGame = async (gameId, winnerPairingId) => {
     try {
-      const response = await fetch(`/api/games/${gameId}`, {
+      const response = await fetchFromApi(`/api/games/${gameId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ winner_pairing_id: winnerPairingId })
       });
       
       if (response.ok) {
-        await loadGames(selectedTournament);
+        await loadGamesData(selectedTournament);
       } else {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.detail || 'Fehler beim Aktualisieren des Spiels');
@@ -594,7 +596,7 @@ function StatisticsTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`/api/statistics/yearly/${year}`);
+      const response = await fetchFromApi(`/api/statistics/yearly/${year}`);
       if (response.ok) {
         const data = await response.json();
         setYearlyScores(data);
@@ -612,7 +614,7 @@ function StatisticsTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetch(`/api/statistics/player/${playerId}/yearly/${year}`);
+      const response = await fetchFromApi(`/api/statistics/player/${playerId}/yearly/${year}`);
       if (response.ok) {
         const data = await response.json();
         setPlayerDetails(data);
@@ -627,7 +629,7 @@ function StatisticsTab() {
     }
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadYearlyScores();
   }, [year]);
 
