@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 class GameUpdate(BaseModel):
-    winner_pairing_id: Optional[int]
+    winner_pairing_id: Optional[int] = None
 
 
 class GameResponse(BaseModel):
@@ -92,14 +92,17 @@ def update_game(game_id: int, game_update: GameUpdate, db: Session = Depends(get
     if not game:
         raise HTTPException(status_code=404, detail="Spiel nicht gefunden.")
     
-    # Prüfe, ob die Gewinner-Paarung eine der beiden Spiel-Paarungen ist (oder None zum Zurücksetzen)
-    if game_update.winner_pairing_id is not None and game_update.winner_pairing_id not in [game.pairing1_id, game.pairing2_id]:
-        raise HTTPException(
-            status_code=400,
-            detail="Die Gewinner-Paarung muss eine der beiden Spiel-Paarungen sein."
-        )
-    
-    game.winner_pairing_id = game_update.winner_pairing_id
+    # Reset erlauben
+    if game_update.winner_pairing_id is None:
+        game.winner_pairing_id = None
+    else:
+        # Prüfe, ob die Gewinner-Paarung eine der beiden Spiel-Paarungen ist
+        if game_update.winner_pairing_id not in [game.pairing1_id, game.pairing2_id]:
+            raise HTTPException(
+                status_code=400,
+                detail="Die Gewinner-Paarung muss eine der beiden Spiel-Paarungen sein."
+            )
+        game.winner_pairing_id = game_update.winner_pairing_id
     db.commit()
     db.refresh(game)
     
@@ -174,4 +177,6 @@ def get_tournament_scores(tournament_id: int, db: Session = Depends(get_db)):
     # Sortiere nach Punkten (absteigend)
     scores.sort(key=lambda x: x["points"], reverse=True)
     return scores
+
+
 

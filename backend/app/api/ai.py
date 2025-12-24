@@ -70,3 +70,5 @@ async def chat(message: str, db: Session = Depends(get_db)):
         "created_at": entry.created_at.isoformat() if entry.created_at else None,
     }
 
+
+

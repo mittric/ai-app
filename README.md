@@ -53,7 +53,7 @@ npm run dev
 ## Spielregeln
 
 - 8 Spieler werden in 4 Zweiergruppen (Paarungen) eingeteilt
-- Die Paarungen rotieren jeden Monat (Round-Robin-System)
-- Jede Paarung spielt 3 mal gegen jede andere Paarung
+- Die Paarungen rotieren jeden Monat (Round-Robin-System über 7 Monate, jeder Partner einmal)
+- Jede Paarung spielt 3 mal gegen jede andere Paarung (9 Spiele pro Paarung)
 - Jeder Sieg gibt 1 Punkt
 - Am Ende des Jahres werden alle Punkte zusammengezählt

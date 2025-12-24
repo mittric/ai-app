@@ -15,3 +15,5 @@ class Player(Base):
     pairings_as_player1 = relationship("Pairing", foreign_keys="Pairing.player1_id", back_populates="player1")
     pairings_as_player2 = relationship("Pairing", foreign_keys="Pairing.player2_id", back_populates="player2")
 
+
+

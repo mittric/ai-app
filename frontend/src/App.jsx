@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { fetchFromApi } from './config';
 
 function App() {
   const [activeTab, setActiveTab] = useState('players');
@@ -82,7 +81,7 @@ function PlayersTab() {
 
   const loadPlayers = async () => {
     try {
-      const response = await fetchFromApi('/api/players');
+      const response = await fetch('/api/players');
       if (response.ok) {
         const data = await response.json();
         setPlayers(data);
@@ -108,7 +107,7 @@ function PlayersTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetchFromApi('/api/players', {
+      const response = await fetch('/api/players', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: newPlayerName.trim() })
@@ -133,25 +132,15 @@ function PlayersTab() {
       return;
     }
 
-    setError('');
     try {
-      const response = await fetchFromApi(`/api/players/${id}`, { method: 'DELETE' });
+      const response = await fetch(`/api/players/${id}`, { method: 'DELETE' });
       if (response.ok) {
         await loadPlayers();
       } else {
-        let errorMessage = 'Fehler beim Löschen des Spielers';
-        try {
-          const data = await response.json();
-          if (data.detail) {
-            errorMessage = data.detail;
-          }
-        } catch (e) {
-          // JSON-Parsing fehlgeschlagen, verwende Standard-Fehlermeldung
-        }
-        setError(errorMessage);
+        throw new Error('Fehler beim Löschen des Spielers');
       }
     } catch (err) {
-      setError(err.message || 'Fehler beim Löschen des Spielers');
+      setError(err.message);
     }
   };
 
@@ -233,7 +222,7 @@ function TournamentsTab() {
 
   const loadTournaments = async () => {
     try {
-      const response = await fetchFromApi('/api/tournaments');
+      const response = await fetch('/api/tournaments');
       if (response.ok) {
         const data = await response.json();
         setTournaments(data);
@@ -259,7 +248,7 @@ function TournamentsTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetchFromApi('/api/tournaments', {
+      const response = await fetch('/api/tournaments', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newTournament)
@@ -276,23 +265,6 @@ function TournamentsTab() {
       setError(err.message);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDeleteTournament = async (id, name) => {
-    if (!window.confirm(`Möchtest du das Turnier "${name}" wirklich löschen? Alle Paarungen und Spiele werden ebenfalls gelöscht.`)) {
-      return;
-    }
-
-    try {
-      const response = await fetchFromApi(`/api/tournaments/${id}`, { method: 'DELETE' });
-      if (response.ok) {
-        await loadTournaments();
-      } else {
-        throw new Error('Fehler beim Löschen des Turniers');
-      }
-    } catch (err) {
-      setError(err.message);
     }
   };
 
@@ -356,42 +328,22 @@ function TournamentsTab() {
                 marginBottom: 15,
                 backgroundColor: '#f9f9f9',
                 borderRadius: 4,
-                border: '1px solid #ddd',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start'
+                border: '1px solid #ddd'
               }}
             >
-              <div style={{ flex: 1 }}>
-                <h4>{tournament.name} ({tournament.month} / {tournament.year})</h4>
-                <div style={{ marginTop: 10 }}>
-                  <strong>Paarungen:</strong>
-                  <ul style={{ marginTop: 5 }}>
-                    {tournament.pairings.map((pairing) => (
-                      <li key={pairing.id}>
-                        {pairing.player1_name} & {pairing.player2_name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+              <h4>{tournament.name} ({tournament.month} / {tournament.year})</h4>
+              <div style={{ marginTop: 10 }}>
+                <strong>Paarungen:</strong>
+                <ul style={{ marginTop: 5 }}>
+                  {tournament.pairings.map((pairing) => (
+                    <li key={pairing.id}>
+                      {pairing.player1_name} &amp; {pairing.player2_name}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <button
-                onClick={() => handleDeleteTournament(tournament.id, tournament.name)}
-                style={{
-                  padding: '8px 12px',
-                  marginLeft: 10,
-                  backgroundColor: '#f44336',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: 4,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap'
-                }}
-              >
-                Löschen
-              </button>
             </div>
-          ))
+          ))}
         )}
       </div>
     </div>
@@ -427,8 +379,8 @@ function GamesTab() {
     setLoading(true);
     try {
       const [gamesRes, scoresRes] = await Promise.all([
-        fetchFromApi(`/api/tournaments/${tournamentId}/games`),
-        fetchFromApi(`/api/tournaments/${tournamentId}/scores`)
+        fetch(`/api/tournaments/${tournamentId}/games`),
+        fetch(`/api/tournaments/${tournamentId}/scores`)
       ]);
       
       if (gamesRes.ok && scoresRes.ok) {
@@ -459,7 +411,7 @@ function GamesTab() {
 
   const handleUpdateGame = async (gameId, winnerPairingId) => {
     try {
-      const response = await fetchFromApi(`/api/games/${gameId}`, {
+      const response = await fetch(`/api/games/${gameId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ winner_pairing_id: winnerPairingId })
@@ -468,12 +420,8 @@ function GamesTab() {
       if (response.ok) {
         await loadGames(selectedTournament);
       } else {
-        try {
-          const data = await response.json();
-          throw new Error(data.detail || 'Fehler beim Aktualisieren des Spiels');
-        } catch (parseErr) {
-          throw new Error('Fehler beim Aktualisieren des Spiels');
-        }
+        const data = await response.json();
+        throw new Error(data.detail || 'Fehler beim Aktualisieren des Spiels');
       }
     } catch (err) {
       setError(err.message);
@@ -517,7 +465,7 @@ function GamesTab() {
                 <tr style={{ backgroundColor: '#4CAF50', color: 'white' }}>
                   <th style={{ padding: 10, textAlign: 'left' }}>Paarung</th>
                   <th style={{ padding: 10, textAlign: 'center' }}>Punkte</th>
-                  <th style={{ padding: 10, textAlign: 'center' }}>Gespielt</th>
+                  <th style={{ padding: 10, textAlign: 'center' }}>Abgeschlossen</th>
                   <th style={{ padding: 10, textAlign: 'center' }}>Gewonnen</th>
                 </tr>
               </thead>
@@ -640,7 +588,7 @@ function StatisticsTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetchFromApi(`/api/statistics/yearly/${year}`);
+      const response = await fetch(`/api/statistics/yearly/${year}`);
       if (response.ok) {
         const data = await response.json();
         setYearlyScores(data);
@@ -658,7 +606,7 @@ function StatisticsTab() {
     setLoading(true);
     setError('');
     try {
-      const response = await fetchFromApi(`/api/statistics/player/${playerId}/yearly/${year}`);
+      const response = await fetch(`/api/statistics/player/${playerId}/yearly/${year}`);
       if (response.ok) {
         const data = await response.json();
         setPlayerDetails(data);

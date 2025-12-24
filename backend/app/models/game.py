@@ -20,3 +20,5 @@ class Game(Base):
     pairing2 = relationship("Pairing", foreign_keys=[pairing2_id], back_populates="games_as_pairing2")
     winner_pairing = relationship("Pairing", foreign_keys=[winner_pairing_id])
 
+
+

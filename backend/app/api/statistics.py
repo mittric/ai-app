@@ -135,3 +135,5 @@ def get_player_yearly_details(player_id: int, year: int, db: Session = Depends(g
     details["total_points"] = total_points
     return details
 
+
+

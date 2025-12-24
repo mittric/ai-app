@@ -16,3 +16,5 @@ class Tournament(Base):
     # Relationships
     pairings = relationship("Pairing", back_populates="tournament", cascade="all, delete-orphan")
 
+
+

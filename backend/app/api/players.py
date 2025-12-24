@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models.player import Player
-from app.models.pairing import Pairing
 
 router = APIRouter()
 
@@ -63,18 +62,9 @@ def delete_player(player_id: int, db: Session = Depends(get_db)):
     if not player:
         raise HTTPException(status_code=404, detail="Spieler nicht gefunden.")
     
-    # Prüfe, ob der Spieler in Paarungen verwendet wird (aktive Turniere)
-    pairings = db.query(Pairing).filter(
-        (Pairing.player1_id == player_id) | (Pairing.player2_id == player_id)
-    ).all()
-    
-    if pairings:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Spieler kann nicht gelöscht werden: {player.name} ist in {len(pairings)} aktiven Turnier(en) eingetragen. Bitte löschen Sie zuerst die entsprechenden Turniere."
-        )
-    
     db.delete(player)
     db.commit()
-    return {"message": f"Spieler '{player.name}' wurde gelöscht."}
+    return {"message": "Spieler gelöscht"}
+
+
 

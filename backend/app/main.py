@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import os
 
 from app import models  # noqa: F401 stellt sicher, dass Modelle registriert sind
 from app.api.players import router as players_router
@@ -13,20 +12,9 @@ Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Kartenspiel-Turnierverwaltung API")
 
-# CORS-Konfiguration: Dynamisch aus Umgebungsvariable oder Standardwerte
-cors_origins_raw = os.environ.get(
-    "CORS_ORIGINS",
-    "https://ai-app-five-nu.vercel.app,http://localhost:5174"
-)
-# Trim whitespace and remove empty entries to avoid accidental mismatches
-cors_origins = [o.strip() for o in cors_origins_raw.split(",") if o.strip()]
-
-# Log the configured CORS origins at startup to make debugging easier in Render logs
-print(f"Configured CORS origins: {cors_origins}")
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=cors_origins,
+    allow_origins=["http://localhost:5173", "http://localhost:5174"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
