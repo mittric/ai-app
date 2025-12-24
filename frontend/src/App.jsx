@@ -344,7 +344,7 @@ function TournamentsTab() {
                 </ul>
               </div>
             </div>
-          ))}
+          ))
         )}
       </div>
     </div>
