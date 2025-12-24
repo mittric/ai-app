@@ -67,7 +67,7 @@ function App() {
 
       {activeTab === 'players' && <PlayersTab />}
       {activeTab === 'tournaments' && <TournamentsTab />}
-      {activeTab === 'games' && <GamesTab />}
+      {activeTab === 'games' && <GamesTab isActive={activeTab === 'games'} />}
       {activeTab === 'statistics' && <StatisticsTab />}
     </div>
   );
@@ -351,7 +351,7 @@ function TournamentsTab() {
   );
 }
 
-function GamesTab() {
+function GamesTab({ isActive }) {
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState(null);
   const [games, setGames] = useState([]);
@@ -403,8 +403,11 @@ function GamesTab() {
   };
 
   React.useEffect(() => {
-    loadTournaments();
-  }, []);
+    // Beim ersten Mount und jedes Mal, wenn der Tab aktiv wird, Turniere laden
+    if (isActive) {
+      loadTournaments();
+    }
+  }, [isActive]);
 
   React.useEffect(() => {
     if (selectedTournament) {
