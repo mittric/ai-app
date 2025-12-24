@@ -117,11 +117,11 @@ function PlayersTab() {
         setNewPlayerName('');
         await loadPlayers();
       } else {
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         throw new Error(data.detail || 'Fehler beim Hinzufügen des Spielers');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Netzwerkfehler beim Hinzufügen des Spielers.');
     } finally {
       setLoading(false);
     }
@@ -137,10 +137,11 @@ function PlayersTab() {
       if (response.ok) {
         await loadPlayers();
       } else {
-        throw new Error('Fehler beim Löschen des Spielers');
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.detail || 'Fehler beim Löschen des Spielers');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Netzwerkfehler beim Löschen des Spielers.');
     }
   };
 
@@ -258,11 +259,11 @@ function TournamentsTab() {
         setNewTournament({ name: '', year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
         await loadTournaments();
       } else {
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         throw new Error(data.detail || 'Fehler beim Erstellen des Turniers');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Netzwerkfehler beim Erstellen des Turniers.');
     } finally {
       setLoading(false);
     }
@@ -390,10 +391,12 @@ function GamesTab() {
         setScores(scoresData);
         setError('');
       } else {
-        throw new Error('Fehler beim Laden der Spiele');
+        const d1 = await gamesRes.json().catch(() => ({}));
+        const d2 = await scoresRes.json().catch(() => ({}));
+        throw new Error(d1.detail || d2.detail || 'Fehler beim Laden der Spiele');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Netzwerkfehler beim Laden der Spiele.');
     } finally {
       setLoading(false);
     }
@@ -420,11 +423,11 @@ function GamesTab() {
       if (response.ok) {
         await loadGames(selectedTournament);
       } else {
-        const data = await response.json();
+        const data = await response.json().catch(() => ({}));
         throw new Error(data.detail || 'Fehler beim Aktualisieren des Spiels');
       }
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Netzwerkfehler beim Aktualisieren des Spiels.');
     }
   };
 
