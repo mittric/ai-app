@@ -5,10 +5,18 @@ function App() {
   const [activeTab, setActiveTab] = useState('players');
 
   return (
-    <div style={{ padding: 20, fontFamily: 'Arial, sans-serif', maxWidth: 1200, margin: '0 auto' }}>
-      <h1>Kartenspiel-Turnierverwaltung</h1>
+    <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: 1200, margin: '0 auto' }}>
+      <h1 style={{ fontSize: '1.5rem', textAlign: 'center' }}>Kartenspiel-Turnierverwaltung</h1>
       
-      <div style={{ marginBottom: 20, borderBottom: '2px solid #ddd' }}>
+      {/* Scrollbare Tab-Leiste für Mobile */}
+      <div style={{ 
+        marginBottom: 20, 
+        borderBottom: '2px solid #ddd', 
+        display: 'flex', 
+        overflowX: 'auto', 
+        WebkitOverflowScrolling: 'touch',
+        whiteSpace: 'nowrap'
+      }}>
         {[
           { id: 'players', label: 'Spieler' },
           { id: 'tournaments', label: 'Turniere' },
@@ -19,13 +27,14 @@ function App() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             style={{
-              padding: '10px 20px',
-              marginRight: 10,
+              padding: '10px 15px',
+              marginRight: 5,
               backgroundColor: activeTab === tab.id ? '#4CAF50' : '#f0f0f0',
               color: activeTab === tab.id ? 'white' : 'black',
               border: 'none',
               cursor: 'pointer',
-              borderRadius: '4px 4px 0 0'
+              borderRadius: '4px 4px 0 0',
+              flexShrink: 0
             }}
           >
             {tab.label}
@@ -87,23 +96,23 @@ function PlayersTab() {
 
   return (
     <div>
-      <h2>Spieler-Verwaltung</h2>
-      <div style={{ marginBottom: 20 }}>
+      <h2>Spieler</h2>
+      <div style={{ marginBottom: 20, display: 'flex', gap: '10px' }}>
         <input 
           value={newPlayerName} 
           onChange={(e) => setNewPlayerName(e.target.value)} 
-          placeholder="Spielername..." 
-          style={{ padding: 10, marginRight: 10, width: '250px' }} 
+          placeholder="Name..." 
+          style={{ padding: 10, flex: 1, minWidth: 0 }} 
         />
-        <button onClick={handleAddPlayer} disabled={loading} style={{ padding: '10px 20px' }}>
-          {loading ? 'Hinzufügen...' : 'Spieler hinzufügen'}
+        <button onClick={handleAddPlayer} disabled={loading} style={{ padding: '10px' }}>
+          {loading ? '+' : 'Hinzufügen'}
         </button>
       </div>
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {players.map(p => (
           <li key={p.id} style={{ padding: 10, background: '#f9f9f9', marginBottom: 5, borderRadius: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span>{p.name}</span>
-            <button onClick={() => handleDeletePlayer(p.id)} style={{ background: '#f44336', color: 'white', border: 'none', padding: '5px 10px', borderRadius: 4, cursor: 'pointer' }}>Löschen</button>
+            <button onClick={() => handleDeletePlayer(p.id)} style={{ background: '#f44336', color: 'white', border: 'none', padding: '8px 12px', borderRadius: 4 }}>Löschen</button>
           </li>
         ))}
       </ul>
@@ -154,46 +163,47 @@ function TournamentsTab() {
 
   return (
     <div>
-      <h2>Turnier-Verwaltung</h2>
-      <div style={{ background: '#f0f0f0', padding: 20, borderRadius: 4, marginBottom: 20 }}>
-        <h3>Neues Turnier erstellen</h3>
-        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+      <div style={{ background: '#f0f0f0', padding: 15, borderRadius: 4, marginBottom: 20 }}>
+        <h3 style={{ marginTop: 0 }}>Neues Turnier</h3>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <input 
             value={newTournament.name} 
             onChange={e => setNewTournament({...newTournament, name: e.target.value})} 
-            placeholder="Turniername (z.B. Neujahrs-Cup)" 
-            style={{ padding: 10, flex: '1 1 200px' }} 
+            placeholder="Name (z.B. Jan 25)" 
+            style={{ padding: 10 }} 
           />
-          <input 
-            type="number" 
-            value={newTournament.year} 
-            onChange={e => setNewTournament({...newTournament, year: parseInt(e.target.value)})} 
-            style={{ padding: 10, width: '100px' }} 
-          />
-          <select 
-            value={newTournament.month} 
-            onChange={e => setNewTournament({...newTournament, month: parseInt(e.target.value)})}
-            style={{ padding: 10 }}
-          >
-            {monthNames.map((name, index) => (
-              <option key={index + 1} value={index + 1}>{name}</option>
-            ))}
-          </select>
-          <button onClick={handleCreate} disabled={loading} style={{ padding: '10px 20px' }}>
-            {loading ? 'Erstellen...' : 'Turnier erstellen'}
+          <div style={{ display: 'flex', gap: '10px' }}>
+            <input 
+              type="number" 
+              value={newTournament.year} 
+              onChange={e => setNewTournament({...newTournament, year: parseInt(e.target.value)})} 
+              style={{ padding: 10, flex: 1 }} 
+            />
+            <select 
+              value={newTournament.month} 
+              onChange={e => setNewTournament({...newTournament, month: parseInt(e.target.value)})}
+              style={{ padding: 10, flex: 1 }}
+            >
+              {monthNames.map((name, index) => (
+                <option key={index + 1} value={index + 1}>{name}</option>
+              ))}
+            </select>
+          </div>
+          <button onClick={handleCreate} disabled={loading} style={{ padding: '12px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: 4 }}>
+            {loading ? '...' : 'Turnier erstellen'}
           </button>
         </div>
       </div>
 
       {tournaments.map(t => (
-        <div key={t.id} style={{ border: '1px solid #ddd', padding: 15, marginBottom: 15, borderRadius: 4, background: '#fcfcfc' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h4 style={{ margin: 0 }}>{t.name} ({monthNames[t.month - 1]} {t.year})</h4>
-            <button onClick={() => handleDelete(t.id)} style={{ background: '#f44336', color: 'white', border: 'none', padding: '5px 10px', borderRadius: 4 }}>Löschen</button>
+        <div key={t.id} style={{ border: '1px solid #ddd', padding: 12, marginBottom: 15, borderRadius: 4, background: '#fcfcfc' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+            <h4 style={{ margin: 0 }}>{t.name}<br/><small>{monthNames[t.month - 1]} {t.year}</small></h4>
+            <button onClick={() => handleDelete(t.id)} style={{ background: '#f44336', color: 'white', border: 'none', padding: '5px 8px', borderRadius: 4, fontSize: '0.8rem' }}>Löschen</button>
           </div>
-          <div style={{ marginTop: 10 }}>
+          <div style={{ marginTop: 10, fontSize: '0.9rem' }}>
             <strong>Paarungen:</strong>
-            <ul style={{ fontSize: '0.9em', marginTop: 5 }}>
+            <ul style={{ paddingLeft: 20, marginTop: 5 }}>
               {t.pairings?.map(p => <li key={p.id}>{p.player1_name} & {p.player2_name}</li>)}
             </ul>
           </div>
@@ -242,21 +252,16 @@ function GamesTab({ isActive }) {
   }, [selectedTournament]);
 
   const handleUpdateGame = async (gameId, winnerPairingId) => {
-    // Optimistic Update: Sofortige UI-Reaktion ohne Reload
     const previousGames = [...games];
     setGames(current => current.map(g => g.id === gameId ? { ...g, winner_pairing_id: winnerPairingId } : g));
-
     try {
       const response = await fetchFromApi(`/api/games/${gameId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ winner_pairing_id: winnerPairingId })
       });
-      if (response.ok) {
-        loadData(selectedTournament); // Hintergrund-Update der Scores
-      } else {
-        setGames(previousGames);
-      }
+      if (response.ok) { loadData(selectedTournament); } 
+      else { setGames(previousGames); }
     } catch (err) { setGames(previousGames); }
   };
 
@@ -264,50 +269,52 @@ function GamesTab({ isActive }) {
 
   return (
     <div>
-      <h2>Spiele erfassen</h2>
-      <select value={selectedTournament || ''} onChange={e => setSelectedTournament(parseInt(e.target.value))} style={{ padding: 10, marginBottom: 20, width: '300px' }}>
+      <select value={selectedTournament || ''} onChange={e => setSelectedTournament(parseInt(e.target.value))} style={{ padding: 12, marginBottom: 20, width: '100%' }}>
         {tournaments.map(t => <option key={t.id} value={t.id}>{t.name} ({t.month}/{t.year})</option>)}
       </select>
 
       {loading ? <p>Lade Spiele...</p> : (
-        <div style={{ display: 'flex', gap: '30px', alignItems: 'flex-start' }}>
-          <div style={{ flex: 2 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Ranking oben auf Mobile */}
+          <div style={{ background: '#e8f5e9', padding: 15, borderRadius: 8 }}>
+            <h3 style={{ marginTop: 0, fontSize: '1.1rem' }}>Ranking</h3>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', fontSize: '0.85rem' }}>
+                <tbody>
+                  {scores.map(s => (
+                    <tr key={s.pairing_id} style={{ borderBottom: '1px solid #c8e6c9' }}>
+                      <td style={{ padding: '5px 0' }}>{s.pairing_names}</td>
+                      <td style={{ textAlign: 'right' }}><strong>{s.points}</strong></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style={{ flex: 1 }}>
             {[1, 2, 3].map(round => (
-              <div key={round} style={{ marginBottom: 25 }}>
-                <h3 style={{ borderBottom: '1px solid #eee' }}>Runde {round}</h3>
+              <div key={round} style={{ marginBottom: 20 }}>
+                <h3 style={{ fontSize: '1.1rem', borderBottom: '1px solid #eee' }}>Runde {round}</h3>
                 {games.filter(g => g.round_number === round).map(game => (
-                  <div key={game.id} style={{ padding: '15px', border: '1px solid #ddd', marginBottom: 10, borderRadius: 6, background: '#fff' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontWeight: 'bold' }}>{game.pairing1_names} vs {game.pairing2_names}</span>
-                      <div>
-                        {!game.winner_pairing_id ? (
-                          <>
-                            <button onClick={() => handleUpdateGame(game.id, game.pairing1_id)} style={{ marginRight: 5, padding: '5px 10px', cursor: 'pointer', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4 }}>Sieg Links</button>
-                            <button onClick={() => handleUpdateGame(game.id, game.pairing2_id)} style={{ padding: '5px 10px', cursor: 'pointer', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4 }}>Sieg Rechts</button>
-                          </>
-                        ) : (
-                          <button onClick={() => handleUpdateGame(game.id, null)} style={{ background: '#f0f0f0', border: '1px solid #ccc', padding: '5px 10px', borderRadius: 4, cursor: 'pointer' }}>Ergebnis zurücksetzen</button>
-                        )}
-                      </div>
+                  <div key={game.id} style={{ padding: '12px', border: '1px solid #ddd', marginBottom: 10, borderRadius: 6, background: '#fff' }}>
+                    <div style={{ marginBottom: 10, fontSize: '0.9rem', fontWeight: 'bold', textAlign: 'center' }}>
+                      {game.pairing1_names} <br/> vs <br/> {game.pairing2_names}
+                    </div>
+                    <div style={{ display: 'flex', gap: '5px' }}>
+                      {!game.winner_pairing_id ? (
+                        <>
+                          <button onClick={() => handleUpdateGame(game.id, game.pairing1_id)} style={{ flex: 1, padding: '10px 5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, fontSize: '0.75rem' }}>Sieg P1</button>
+                          <button onClick={() => handleUpdateGame(game.id, game.pairing2_id)} style={{ flex: 1, padding: '10px 5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, fontSize: '0.75rem' }}>Sieg P2</button>
+                        </>
+                      ) : (
+                        <button onClick={() => handleUpdateGame(game.id, null)} style={{ flex: 1, padding: '10px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: 4 }}>Reset</button>
+                      )}
                     </div>
                   </div>
                 ))}
               </div>
             ))}
-          </div>
-          
-          <div style={{ flex: 1, position: 'sticky', top: '20px', background: '#e8f5e9', padding: 20, borderRadius: 8, boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ marginTop: 0 }}>Turnier-Ranking</h3>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <tbody>
-                {scores.map(s => (
-                  <tr key={s.pairing_id} style={{ borderBottom: '1px solid #c8e6c9' }}>
-                    <td style={{ padding: '8px 0', fontSize: '0.9em' }}>{s.pairing_names}</td>
-                    <td style={{ padding: '8px 0', textAlign: 'right' }}><strong>{s.points} Pkt.</strong></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </div>
       )}
@@ -329,31 +336,30 @@ function StatisticsTab() {
 
   return (
     <div>
-      <h2>Jahreswertung {year}</h2>
       <div style={{ marginBottom: 20 }}>
-        <label>Jahr wechseln: </label>
-        <input type="number" value={year} onChange={e => setYear(parseInt(e.target.value))} style={{ padding: 8, width: '100px' }} />
+        <label>Jahr: </label>
+        <input type="number" value={year} onChange={e => setYear(parseInt(e.target.value))} style={{ padding: 10, width: '80px' }} />
       </div>
-      <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff' }}>
-        <thead>
-          <tr style={{ background: '#4CAF50', color: 'white' }}>
-            <th style={{ padding: 12 }}>Platz</th>
-            <th style={{ padding: 12, textAlign: 'left' }}>Spieler</th>
-            <th style={{ padding: 12 }}>Punkte</th>
-            <th style={{ padding: 12 }}>Turniere</th>
-          </tr>
-        </thead>
-        <tbody>
-          {yearlyScores.map((s, i) => (
-            <tr key={s.player_id} style={{ borderBottom: '1px solid #eee', textAlign: 'center' }}>
-              <td style={{ padding: 12 }}>{i+1}</td>
-              <td style={{ padding: 12, textAlign: 'left' }}>{s.player_name}</td>
-              <td style={{ padding: 12, fontWeight: 'bold' }}>{s.total_points}</td>
-              <td style={{ padding: 12 }}>{s.tournaments_played}</td>
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', fontSize: '0.9rem' }}>
+          <thead>
+            <tr style={{ background: '#4CAF50', color: 'white' }}>
+              <th style={{ padding: 10 }}>#</th>
+              <th style={{ padding: 10, textAlign: 'left' }}>Spieler</th>
+              <th style={{ padding: 10 }}>Pkt</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {yearlyScores.map((s, i) => (
+              <tr key={s.player_id} style={{ borderBottom: '1px solid #eee' }}>
+                <td style={{ padding: 10, textAlign: 'center' }}>{i+1}</td>
+                <td style={{ padding: 10 }}>{s.player_name}</td>
+                <td style={{ padding: 10, textAlign: 'center', fontWeight: 'bold' }}>{s.total_points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
