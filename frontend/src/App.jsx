@@ -9,7 +9,7 @@ function Login({ onLogin }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     // ERSETZE DAS PASSWORT HIER DURCH DEIN WUNSCHPASSWORT
-    if (password === "Turnier2024") {
+    if (password === "träumer") {
       localStorage.setItem('app_password', password);
       onLogin();
     } else {
