@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-// Importiere die API-Hilfsfunktionen aus deiner config.js
-// ...
 import { fetchFromApi } from './config';
 
 function App() {
@@ -272,7 +270,6 @@ function TournamentsTab() {
     }
   };
 
-
   const handleDeleteTournament = async (id) => {
     if (!window.confirm('Möchtest du dieses Turnier wirklich löschen? Alle zugehörigen Spiele und Ergebnisse gehen verloren!')) {
       return;
@@ -281,7 +278,7 @@ function TournamentsTab() {
     try {
       const response = await fetchFromApi(`/api/tournaments/${id}`, { method: 'DELETE' });
       if (response.ok) {
-        await loadTournaments(); // Liste neu laden
+        await loadTournaments();
       } else {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.detail || 'Fehler beim Löschen des Turniers');
@@ -365,12 +362,27 @@ function TournamentsTab() {
                     border: 'none',
                     borderRadius: 4,
                     cursor: 'pointer'
-                }}
-              >
-              Turnier löschen
-            </button>
-          </div>
-          </div>
+                  }}
+                >
+                  Turnier löschen
+                </button>
+              </div>
+
+              <div style={{ marginTop: 10 }}>
+                <strong>Paarungen:</strong>
+                {tournament.pairings && tournament.pairings.length > 0 ? (
+                  <ul style={{ marginTop: 5 }}>
+                    {tournament.pairings.map((pairing) => (
+                      <li key={pairing.id}>
+                        {pairing.player1_name} & {pairing.player2_name}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p style={{ fontSize: '0.8em', color: '#666' }}>Keine Paarungen geladen.</p>
+                )}
+              </div>
+            </div>
           ))
         )}
       </div>
