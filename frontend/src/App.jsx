@@ -8,7 +8,6 @@ function Login({ onLogin }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // ERSETZE DAS PASSWORT HIER DURCH DEIN WUNSCHPASSWORT
     if (password === "träumer") {
       localStorage.setItem('app_password', password);
       onLogin();
@@ -50,7 +49,6 @@ function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('players');
 
-  // Prüfen ob bereits eingeloggt
   useEffect(() => {
     const savedPassword = localStorage.getItem('app_password');
     if (savedPassword === "Turnier2024") {
@@ -68,7 +66,7 @@ function App() {
         <h1 style={{ fontSize: '1.2rem' }}>Turnierverwaltung</h1>
         <button 
           onClick={() => { localStorage.removeItem('app_password'); setIsAuthenticated(false); }}
-          style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer' }}
+          style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px' }}
         >
           Logout
         </button>
@@ -214,7 +212,7 @@ function TournamentsTab() {
             <select 
               value={newTournament.month} 
               onChange={e => setNewTournament({...newTournament, month: parseInt(e.target.value)})}
-              style={{ padding: 10, flex: 2, fontSize: '16px' }}
+              style={{ padding: 10, flex: 3, fontSize: '16px' }}
             >
               {monthNames.map((name, index) => (
                 <option key={index + 1} value={index + 1}>{name}</option>
@@ -224,7 +222,7 @@ function TournamentsTab() {
               type="number" 
               value={newTournament.year} 
               onChange={e => setNewTournament({...newTournament, year: parseInt(e.target.value)})} 
-              style={{ padding: 10, flex: 1, fontSize: '16px' }} 
+              style={{ padding: 10, width: '80px', fontSize: '16px' }} 
             />
           </div>
           <button onClick={handleCreate} disabled={loading} style={{ padding: '12px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, fontSize: '16px' }}>
@@ -237,6 +235,13 @@ function TournamentsTab() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h4 style={{ margin: 0 }}>{t.name}</h4>
             <button onClick={() => handleDelete(t.id)} style={{ background: '#f44336', color: 'white', border: 'none', padding: '5px 8px', borderRadius: 4, fontSize: '0.8rem' }}>Löschen</button>
+          </div>
+          {/* Paarungen wieder sichtbar gemacht */}
+          <div style={{ marginTop: 10, fontSize: '0.9rem' }}>
+            <strong>Paarungen:</strong>
+            <ul style={{ paddingLeft: 20, marginTop: 5 }}>
+              {t.pairings?.map(p => <li key={p.id}>{p.player1_name} & {p.player2_name}</li>)}
+            </ul>
           </div>
         </div>
       ))}
