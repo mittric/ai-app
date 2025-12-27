@@ -8,7 +8,6 @@ function App() {
     <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: 1200, margin: '0 auto' }}>
       <h1 style={{ fontSize: '1.5rem', textAlign: 'center' }}>Kartenspiel-Turnierverwaltung</h1>
       
-      {/* Scrollbare Tab-Leiste für Mobile */}
       <div style={{ 
         marginBottom: 20, 
         borderBottom: '2px solid #ddd', 
@@ -34,7 +33,8 @@ function App() {
               border: 'none',
               cursor: 'pointer',
               borderRadius: '4px 4px 0 0',
-              flexShrink: 0
+              flexShrink: 0,
+              fontSize: '16px' // Verhindert Zoom auf iOS
             }}
           >
             {tab.label}
@@ -55,16 +55,12 @@ function PlayersTab() {
   const [players, setPlayers] = useState([]);
   const [newPlayerName, setNewPlayerName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const loadPlayers = async () => {
     try {
       const response = await fetchFromApi('/api/players');
-      if (response.ok) {
-        const data = await response.json();
-        setPlayers(data);
-      }
-    } catch (err) { setError(err.message); }
+      if (response.ok) setPlayers(await response.json());
+    } catch (err) { console.error(err); }
   };
 
   useEffect(() => { loadPlayers(); }, []);
@@ -82,16 +78,13 @@ function PlayersTab() {
         setNewPlayerName('');
         await loadPlayers();
       }
-    } catch (err) { setError(err.message); }
-    finally { setLoading(false); }
+    } finally { setLoading(false); }
   };
 
   const handleDeletePlayer = async (id) => {
     if (!window.confirm('Spieler wirklich löschen?')) return;
-    try {
-      const response = await fetchFromApi(`/api/players/${id}`, { method: 'DELETE' });
-      if (response.ok) await loadPlayers();
-    } catch (err) { setError(err.message); }
+    await fetchFromApi(`/api/players/${id}`, { method: 'DELETE' });
+    await loadPlayers();
   };
 
   return (
@@ -102,9 +95,9 @@ function PlayersTab() {
           value={newPlayerName} 
           onChange={(e) => setNewPlayerName(e.target.value)} 
           placeholder="Name..." 
-          style={{ padding: 10, flex: 1, minWidth: 0 }} 
+          style={{ padding: 10, flex: 1, minWidth: 0, fontSize: '16px' }} 
         />
-        <button onClick={handleAddPlayer} disabled={loading} style={{ padding: '10px' }}>
+        <button onClick={handleAddPlayer} disabled={loading} style={{ padding: '10px', fontSize: '16px' }}>
           {loading ? '+' : 'Hinzufügen'}
         </button>
       </div>
@@ -124,7 +117,6 @@ function PlayersTab() {
 function TournamentsTab() {
   const [tournaments, setTournaments] = useState([]);
   const [newTournament, setNewTournament] = useState({ 
-    name: '', 
     year: new Date().getFullYear(), 
     month: new Date().getMonth() + 1 
   });
@@ -140,15 +132,16 @@ function TournamentsTab() {
   useEffect(() => { loadTournaments(); }, []);
 
   const handleCreate = async () => {
-    if (!newTournament.name.trim()) return;
     setLoading(true);
+    // Name wird automatisch generiert: z.B. "Januar 2025"
+    const autoName = `${monthNames[newTournament.month - 1]} ${newTournament.year}`;
+    
     const response = await fetchFromApi('/api/tournaments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(newTournament)
+      body: JSON.stringify({ ...newTournament, name: autoName })
     });
     if (response.ok) {
-        setNewTournament({ name: '', year: new Date().getFullYear(), month: new Date().getMonth() + 1 });
         await loadTournaments();
     }
     setLoading(false);
@@ -166,30 +159,24 @@ function TournamentsTab() {
       <div style={{ background: '#f0f0f0', padding: 15, borderRadius: 4, marginBottom: 20 }}>
         <h3 style={{ marginTop: 0 }}>Neues Turnier</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          <input 
-            value={newTournament.name} 
-            onChange={e => setNewTournament({...newTournament, name: e.target.value})} 
-            placeholder="Name (z.B. Jan 25)" 
-            style={{ padding: 10 }} 
-          />
           <div style={{ display: 'flex', gap: '10px' }}>
-            <input 
-              type="number" 
-              value={newTournament.year} 
-              onChange={e => setNewTournament({...newTournament, year: parseInt(e.target.value)})} 
-              style={{ padding: 10, flex: 1 }} 
-            />
             <select 
               value={newTournament.month} 
               onChange={e => setNewTournament({...newTournament, month: parseInt(e.target.value)})}
-              style={{ padding: 10, flex: 1 }}
+              style={{ padding: 10, flex: 2, fontSize: '16px' }}
             >
               {monthNames.map((name, index) => (
                 <option key={index + 1} value={index + 1}>{name}</option>
               ))}
             </select>
+            <input 
+              type="number" 
+              value={newTournament.year} 
+              onChange={e => setNewTournament({...newTournament, year: parseInt(e.target.value)})} 
+              style={{ padding: 10, flex: 1, fontSize: '16px' }} 
+            />
           </div>
-          <button onClick={handleCreate} disabled={loading} style={{ padding: '12px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: 4 }}>
+          <button onClick={handleCreate} disabled={loading} style={{ padding: '12px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, fontSize: '16px' }}>
             {loading ? '...' : 'Turnier erstellen'}
           </button>
         </div>
@@ -198,7 +185,7 @@ function TournamentsTab() {
       {tournaments.map(t => (
         <div key={t.id} style={{ border: '1px solid #ddd', padding: 12, marginBottom: 15, borderRadius: 4, background: '#fcfcfc' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-            <h4 style={{ margin: 0 }}>{t.name}<br/><small>{monthNames[t.month - 1]} {t.year}</small></h4>
+            <h4 style={{ margin: 0 }}>{t.name}</h4>
             <button onClick={() => handleDelete(t.id)} style={{ background: '#f44336', color: 'white', border: 'none', padding: '5px 8px', borderRadius: 4, fontSize: '0.8rem' }}>Löschen</button>
           </div>
           <div style={{ marginTop: 10, fontSize: '0.9rem' }}>
@@ -269,46 +256,43 @@ function GamesTab({ isActive }) {
 
   return (
     <div>
-      <select value={selectedTournament || ''} onChange={e => setSelectedTournament(parseInt(e.target.value))} style={{ padding: 12, marginBottom: 20, width: '100%' }}>
-        {tournaments.map(t => <option key={t.id} value={t.id}>{t.name} ({t.month}/{t.year})</option>)}
+      <select value={selectedTournament || ''} onChange={e => setSelectedTournament(parseInt(e.target.value))} style={{ padding: 12, marginBottom: 20, width: '100%', fontSize: '16px' }}>
+        {tournaments.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
       </select>
 
       {loading ? <p>Lade Spiele...</p> : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Ranking oben auf Mobile */}
           <div style={{ background: '#e8f5e9', padding: 15, borderRadius: 8 }}>
             <h3 style={{ marginTop: 0, fontSize: '1.1rem' }}>Ranking</h3>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', fontSize: '0.85rem' }}>
-                <tbody>
-                  {scores.map(s => (
-                    <tr key={s.pairing_id} style={{ borderBottom: '1px solid #c8e6c9' }}>
-                      <td style={{ padding: '5px 0' }}>{s.pairing_names}</td>
-                      <td style={{ textAlign: 'right' }}><strong>{s.points}</strong></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <table style={{ width: '100%', fontSize: '0.85rem' }}>
+              <tbody>
+                {scores.map(s => (
+                  <tr key={s.pairing_id} style={{ borderBottom: '1px solid #c8e6c9' }}>
+                    <td style={{ padding: '5px 0' }}>{s.pairing_names}</td>
+                    <td style={{ textAlign: 'right' }}><strong>{s.points}</strong></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
 
-          <div style={{ flex: 1 }}>
+          <div>
             {[1, 2, 3].map(round => (
               <div key={round} style={{ marginBottom: 20 }}>
                 <h3 style={{ fontSize: '1.1rem', borderBottom: '1px solid #eee' }}>Runde {round}</h3>
                 {games.filter(g => g.round_number === round).map(game => (
                   <div key={game.id} style={{ padding: '12px', border: '1px solid #ddd', marginBottom: 10, borderRadius: 6, background: '#fff' }}>
                     <div style={{ marginBottom: 10, fontSize: '0.9rem', fontWeight: 'bold', textAlign: 'center' }}>
-                      {game.pairing1_names} <br/> vs <br/> {game.pairing2_names}
+                      {game.pairing1_names} vs {game.pairing2_names}
                     </div>
                     <div style={{ display: 'flex', gap: '5px' }}>
                       {!game.winner_pairing_id ? (
                         <>
-                          <button onClick={() => handleUpdateGame(game.id, game.pairing1_id)} style={{ flex: 1, padding: '10px 5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, fontSize: '0.75rem' }}>Sieg P1</button>
-                          <button onClick={() => handleUpdateGame(game.id, game.pairing2_id)} style={{ flex: 1, padding: '10px 5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, fontSize: '0.75rem' }}>Sieg P2</button>
+                          <button onClick={() => handleUpdateGame(game.id, game.pairing1_id)} style={{ flex: 1, padding: '12px 5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, fontSize: '14px' }}>Sieg P1</button>
+                          <button onClick={() => handleUpdateGame(game.id, game.pairing2_id)} style={{ flex: 1, padding: '12px 5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, fontSize: '14px' }}>Sieg P2</button>
                         </>
                       ) : (
-                        <button onClick={() => handleUpdateGame(game.id, null)} style={{ flex: 1, padding: '10px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: 4 }}>Reset</button>
+                        <button onClick={() => handleUpdateGame(game.id, null)} style={{ flex: 1, padding: '12px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: 4, fontSize: '14px' }}>Reset</button>
                       )}
                     </div>
                   </div>
@@ -338,7 +322,7 @@ function StatisticsTab() {
     <div>
       <div style={{ marginBottom: 20 }}>
         <label>Jahr: </label>
-        <input type="number" value={year} onChange={e => setYear(parseInt(e.target.value))} style={{ padding: 10, width: '80px' }} />
+        <input type="number" value={year} onChange={e => setYear(parseInt(e.target.value))} style={{ padding: 10, width: '80px', fontSize: '16px' }} />
       </div>
       <div style={{ overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', fontSize: '0.9rem' }}>
