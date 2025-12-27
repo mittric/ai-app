@@ -1,20 +1,82 @@
 import React, { useState, useEffect } from 'react';
 import { fetchFromApi } from './config';
 
+// --- LOGIN KOMPONENTE ---
+function Login({ onLogin }) {
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // ERSETZE DAS PASSWORT HIER DURCH DEIN WUNSCHPASSWORT
+    if (password === "Turnier2024") {
+      localStorage.setItem('app_password', password);
+      onLogin();
+    } else {
+      setError(true);
+    }
+  };
+
+  return (
+    <div style={{ 
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
+      height: '80vh', padding: '20px', textAlign: 'center' 
+    }}>
+      <h2>Zugang geschützt</h2>
+      <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: '300px' }}>
+        <input
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          placeholder="Passwort eingeben"
+          style={{ 
+            width: '100%', padding: '15px', fontSize: '16px', 
+            marginBottom: '10px', borderRadius: '8px', border: '1px solid #ccc' 
+          }}
+        />
+        {error && <p style={{ color: 'red' }}>Falsches Passwort!</p>}
+        <button type="submit" style={{ 
+          width: '100%', padding: '15px', fontSize: '16px', 
+          backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '8px' 
+        }}>
+          Anmelden
+        </button>
+      </form>
+    </div>
+  );
+}
+
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('players');
+
+  // Prüfen ob bereits eingeloggt
+  useEffect(() => {
+    const savedPassword = localStorage.getItem('app_password');
+    if (savedPassword === "Turnier2024") {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  if (!isAuthenticated) {
+    return <Login onLogin={() => setIsAuthenticated(true)} />;
+  }
 
   return (
     <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: 1200, margin: '0 auto' }}>
-      <h1 style={{ fontSize: '1.5rem', textAlign: 'center' }}>Kartenspiel-Turnierverwaltung</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 style={{ fontSize: '1.2rem' }}>Turnierverwaltung</h1>
+        <button 
+          onClick={() => { localStorage.removeItem('app_password'); setIsAuthenticated(false); }}
+          style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px', cursor: 'pointer' }}
+        >
+          Logout
+        </button>
+      </div>
       
       <div style={{ 
-        marginBottom: 20, 
-        borderBottom: '2px solid #ddd', 
-        display: 'flex', 
-        overflowX: 'auto', 
-        WebkitOverflowScrolling: 'touch',
-        whiteSpace: 'nowrap'
+        marginBottom: 20, borderBottom: '2px solid #ddd', display: 'flex', 
+        overflowX: 'auto', WebkitOverflowScrolling: 'touch', whiteSpace: 'nowrap'
       }}>
         {[
           { id: 'players', label: 'Spieler' },
@@ -26,15 +88,10 @@ function App() {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             style={{
-              padding: '10px 15px',
-              marginRight: 5,
+              padding: '10px 15px', marginRight: 5,
               backgroundColor: activeTab === tab.id ? '#4CAF50' : '#f0f0f0',
               color: activeTab === tab.id ? 'white' : 'black',
-              border: 'none',
-              cursor: 'pointer',
-              borderRadius: '4px 4px 0 0',
-              flexShrink: 0,
-              fontSize: '16px' // Verhindert Zoom auf iOS
+              border: 'none', borderRadius: '4px 4px 0 0', fontSize: '16px'
             }}
           >
             {tab.label}
@@ -89,7 +146,6 @@ function PlayersTab() {
 
   return (
     <div>
-      <h2>Spieler</h2>
       <div style={{ marginBottom: 20, display: 'flex', gap: '10px' }}>
         <input 
           value={newPlayerName} 
@@ -98,7 +154,7 @@ function PlayersTab() {
           style={{ padding: 10, flex: 1, minWidth: 0, fontSize: '16px' }} 
         />
         <button onClick={handleAddPlayer} disabled={loading} style={{ padding: '10px', fontSize: '16px' }}>
-          {loading ? '+' : 'Hinzufügen'}
+          {loading ? '+' : 'Add'}
         </button>
       </div>
       <ul style={{ listStyle: 'none', padding: 0 }}>
@@ -133,17 +189,13 @@ function TournamentsTab() {
 
   const handleCreate = async () => {
     setLoading(true);
-    // Name wird automatisch generiert: z.B. "Januar 2025"
     const autoName = `${monthNames[newTournament.month - 1]} ${newTournament.year}`;
-    
     const response = await fetchFromApi('/api/tournaments', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ ...newTournament, name: autoName })
     });
-    if (response.ok) {
-        await loadTournaments();
-    }
+    if (response.ok) await loadTournaments();
     setLoading(false);
   };
 
@@ -157,7 +209,6 @@ function TournamentsTab() {
   return (
     <div>
       <div style={{ background: '#f0f0f0', padding: 15, borderRadius: 4, marginBottom: 20 }}>
-        <h3 style={{ marginTop: 0 }}>Neues Turnier</h3>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           <div style={{ display: 'flex', gap: '10px' }}>
             <select 
@@ -181,18 +232,11 @@ function TournamentsTab() {
           </button>
         </div>
       </div>
-
       {tournaments.map(t => (
         <div key={t.id} style={{ border: '1px solid #ddd', padding: 12, marginBottom: 15, borderRadius: 4, background: '#fcfcfc' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <h4 style={{ margin: 0 }}>{t.name}</h4>
             <button onClick={() => handleDelete(t.id)} style={{ background: '#f44336', color: 'white', border: 'none', padding: '5px 8px', borderRadius: 4, fontSize: '0.8rem' }}>Löschen</button>
-          </div>
-          <div style={{ marginTop: 10, fontSize: '0.9rem' }}>
-            <strong>Paarungen:</strong>
-            <ul style={{ paddingLeft: 20, marginTop: 5 }}>
-              {t.pairings?.map(p => <li key={p.id}>{p.player1_name} & {p.player2_name}</li>)}
-            </ul>
           </div>
         </div>
       ))}
@@ -247,8 +291,8 @@ function GamesTab({ isActive }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ winner_pairing_id: winnerPairingId })
       });
-      if (response.ok) { loadData(selectedTournament); } 
-      else { setGames(previousGames); }
+      if (response.ok) loadData(selectedTournament);
+      else setGames(previousGames);
     } catch (err) { setGames(previousGames); }
   };
 
@@ -259,49 +303,45 @@ function GamesTab({ isActive }) {
       <select value={selectedTournament || ''} onChange={e => setSelectedTournament(parseInt(e.target.value))} style={{ padding: 12, marginBottom: 20, width: '100%', fontSize: '16px' }}>
         {tournaments.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
       </select>
-
-      {loading ? <p>Lade Spiele...</p> : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ background: '#e8f5e9', padding: 15, borderRadius: 8 }}>
-            <h3 style={{ marginTop: 0, fontSize: '1.1rem' }}>Ranking</h3>
-            <table style={{ width: '100%', fontSize: '0.85rem' }}>
-              <tbody>
-                {scores.map(s => (
-                  <tr key={s.pairing_id} style={{ borderBottom: '1px solid #c8e6c9' }}>
-                    <td style={{ padding: '5px 0' }}>{s.pairing_names}</td>
-                    <td style={{ textAlign: 'right' }}><strong>{s.points}</strong></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          <div>
-            {[1, 2, 3].map(round => (
-              <div key={round} style={{ marginBottom: 20 }}>
-                <h3 style={{ fontSize: '1.1rem', borderBottom: '1px solid #eee' }}>Runde {round}</h3>
-                {games.filter(g => g.round_number === round).map(game => (
-                  <div key={game.id} style={{ padding: '12px', border: '1px solid #ddd', marginBottom: 10, borderRadius: 6, background: '#fff' }}>
-                    <div style={{ marginBottom: 10, fontSize: '0.9rem', fontWeight: 'bold', textAlign: 'center' }}>
-                      {game.pairing1_names} vs {game.pairing2_names}
-                    </div>
-                    <div style={{ display: 'flex', gap: '5px' }}>
-                      {!game.winner_pairing_id ? (
-                        <>
-                          <button onClick={() => handleUpdateGame(game.id, game.pairing1_id)} style={{ flex: 1, padding: '12px 5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, fontSize: '14px' }}>Sieg P1</button>
-                          <button onClick={() => handleUpdateGame(game.id, game.pairing2_id)} style={{ flex: 1, padding: '12px 5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4, fontSize: '14px' }}>Sieg P2</button>
-                        </>
-                      ) : (
-                        <button onClick={() => handleUpdateGame(game.id, null)} style={{ flex: 1, padding: '12px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: 4, fontSize: '14px' }}>Reset</button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ background: '#e8f5e9', padding: 15, borderRadius: 8 }}>
+          <h3 style={{ marginTop: 0, fontSize: '1.1rem' }}>Ranking</h3>
+          <table style={{ width: '100%', fontSize: '0.85rem' }}>
+            <tbody>
+              {scores.map(s => (
+                <tr key={s.pairing_id} style={{ borderBottom: '1px solid #c8e6c9' }}>
+                  <td style={{ padding: '5px 0' }}>{s.pairing_names}</td>
+                  <td style={{ textAlign: 'right' }}><strong>{s.points}</strong></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      )}
+        <div>
+          {[1, 2, 3].map(round => (
+            <div key={round} style={{ marginBottom: 20 }}>
+              <h3 style={{ fontSize: '1.1rem', borderBottom: '1px solid #eee' }}>Runde {round}</h3>
+              {games.filter(g => g.round_number === round).map(game => (
+                <div key={game.id} style={{ padding: '12px', border: '1px solid #ddd', marginBottom: 10, borderRadius: 6, background: '#fff' }}>
+                  <div style={{ marginBottom: 10, fontSize: '0.9rem', fontWeight: 'bold', textAlign: 'center' }}>
+                    {game.pairing1_names} vs {game.pairing2_names}
+                  </div>
+                  <div style={{ display: 'flex', gap: '5px' }}>
+                    {!game.winner_pairing_id ? (
+                      <>
+                        <button onClick={() => handleUpdateGame(game.id, game.pairing1_id)} style={{ flex: 1, padding: '12px 5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4 }}>Sieg P1</button>
+                        <button onClick={() => handleUpdateGame(game.id, game.pairing2_id)} style={{ flex: 1, padding: '12px 5px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: 4 }}>Sieg P2</button>
+                      </>
+                    ) : (
+                      <button onClick={() => handleUpdateGame(game.id, null)} style={{ flex: 1, padding: '12px', background: '#f0f0f0', border: '1px solid #ccc', borderRadius: 4 }}>Reset</button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -310,13 +350,13 @@ function GamesTab({ isActive }) {
 function StatisticsTab() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [yearlyScores, setYearlyScores] = useState([]);
-  
-  const loadStats = async () => {
-    const res = await fetchFromApi(`/api/statistics/yearly/${year}`);
-    if (res.ok) setYearlyScores(await res.json());
-  };
-
-  useEffect(() => { loadStats(); }, [year]);
+  useEffect(() => {
+    const loadStats = async () => {
+      const res = await fetchFromApi(`/api/statistics/yearly/${year}`);
+      if (res.ok) setYearlyScores(await res.json());
+    };
+    loadStats();
+  }, [year]);
 
   return (
     <div>
