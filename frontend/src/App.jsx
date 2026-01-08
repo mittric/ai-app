@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import './i18n';
 import { fetchFromApi } from './config';
 
 // --- LOGIN KOMPONENTE ---
 function Login({ onLogin }) {
+  const { t } = useTranslation();
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
 
@@ -21,24 +24,24 @@ function Login({ onLogin }) {
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', 
       height: '80vh', padding: '20px', textAlign: 'center' 
     }}>
-      <h2>Zugang geschützt</h2>
+      <h2>{t('welcome')}</h2>
       <form onSubmit={handleSubmit} style={{ width: '100%', maxWidth: '300px' }}>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Passwort eingeben"
+          placeholder={t('password_placeholder', 'Passwort eingeben')}
           style={{ 
             width: '100%', padding: '15px', fontSize: '16px', 
             marginBottom: '10px', borderRadius: '8px', border: '1px solid #ccc' 
           }}
         />
-        {error && <p style={{ color: 'red' }}>Falsches Passwort!</p>}
+        {error && <p style={{ color: 'red' }}>{t('wrong_password', 'Falsches Passwort!')}</p>}
         <button type="submit" style={{ 
           width: '100%', padding: '15px', fontSize: '16px', 
           backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '8px' 
         }}>
-          Anmelden
+          {t('login', 'Anmelden')}
         </button>
       </form>
     </div>
@@ -46,6 +49,7 @@ function Login({ onLogin }) {
 }
 
 function App() {
+  const { t, i18n } = useTranslation();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState('players');
 
@@ -61,35 +65,42 @@ function App() {
   }
 
   return (
-    <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: 1200, margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1 style={{ fontSize: '1.2rem' }}>Turnierverwaltung</h1>
-        <button 
-          onClick={() => { localStorage.removeItem('app_password'); setIsAuthenticated(false); }}
-          style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px' }}
-        >
-          Logout
-        </button>
+    <div style={{ padding: '10px', fontFamily: 'Arial, sans-serif', maxWidth: '100%', margin: '0 auto', minHeight: '100vh', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'center', alignItems: 'stretch', width: '100%' }}>
+        <h1 style={{ fontSize: '1.5rem', textAlign: 'center', marginBottom: '5px' }}>{t('app_title', 'Turnierverwaltung')}</h1>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+          <select value={i18n.language} onChange={e => i18n.changeLanguage(e.target.value)} style={{ fontSize: '12px', padding: '2px 6px', borderRadius: '4px' }}>
+            <option value="de">Deutsch</option>
+            <option value="en">English</option>
+            <option value="it">Italiano</option>
+          </select>
+          <button 
+            onClick={() => { localStorage.removeItem('app_password'); setIsAuthenticated(false); }}
+            style={{ background: 'none', border: 'none', color: '#888', fontSize: '12px' }}
+          >
+            {t('logout', 'Logout')}
+          </button>
+        </div>
       </div>
       
       <div style={{ 
-        marginBottom: 20, borderBottom: '2px solid #ddd', display: 'flex', 
-        overflowX: 'auto', WebkitOverflowScrolling: 'touch', whiteSpace: 'nowrap'
+        marginBottom: 20, borderBottom: '2px solid #ddd', display: 'flex', flexWrap: 'wrap',
+        overflowX: 'auto', WebkitOverflowScrolling: 'touch', whiteSpace: 'nowrap', gap: '5px'
       }}>
         {[
-          { id: 'players', label: 'Spieler' },
-          { id: 'tournaments', label: 'Turniere' },
-          { id: 'games', label: 'Spiele' },
-          { id: 'statistics', label: 'Übersichten' }
+          { id: 'players', label: t('players_tab', 'Spieler') },
+          { id: 'tournaments', label: t('tournaments_tab', 'Turniere') },
+          { id: 'games', label: t('games_tab', 'Spiele') },
+          { id: 'statistics', label: t('statistics_tab', 'Übersichten') }
         ].map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             style={{
-              padding: '10px 15px', marginRight: 5,
+              padding: '12px 18px', marginRight: 0,
               backgroundColor: activeTab === tab.id ? '#4CAF50' : '#f0f0f0',
               color: activeTab === tab.id ? 'white' : 'black',
-              border: 'none', borderRadius: '4px 4px 0 0', fontSize: '16px'
+              border: 'none', borderRadius: '8px 8px 0 0', fontSize: '18px', minWidth: '100px', flex: '1 1 40%'
             }}
           >
             {tab.label}
@@ -112,6 +123,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card.j
 import { UserPlus, Trash2, Users, Loader2 } from "lucide-react";
 
 function PlayersTab() {
+  const { t } = useTranslation();
   const [players, setPlayers] = useState([]);
   const [newPlayerName, setNewPlayerName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -170,7 +182,7 @@ function PlayersTab() {
           <div className="p-2 rounded-xl bg-primary/10">
             <Users className="h-6 w-6 text-primary" />
           </div>
-          Spieler verwalten
+          {t('manage_players', 'Spieler verwalten')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -180,7 +192,7 @@ function PlayersTab() {
             value={newPlayerName}
             onChange={(e) => setNewPlayerName(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Spielername eingeben..."
+            placeholder={t('player_name_placeholder', 'Spielername eingeben...')}
             className="flex-1 h-12 text-base bg-secondary/50 border-0 focus-visible:ring-2 focus-visible:ring-primary"
             disabled={loading}
           />
@@ -194,7 +206,7 @@ function PlayersTab() {
             ) : (
               <>
                 <UserPlus className="h-5 w-5" />
-                Hinzufügen
+                {t('add', 'Hinzufügen')}
               </>
             )}
           </Button>
@@ -209,8 +221,8 @@ function PlayersTab() {
           ) : players.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Users className="h-12 w-12 mx-auto mb-3 opacity-40" />
-              <p className="text-lg">Noch keine Spieler vorhanden</p>
-              <p className="text-sm">Füge deinen ersten Spieler hinzu!</p>
+              <p className="text-lg">{t('no_players', 'Noch keine Spieler vorhanden')}</p>
+              <p className="text-sm">{t('add_first_player', 'Füge deinen ersten Spieler hinzu!')}</p>
             </div>
           ) : (
             <ul className="space-y-2">
@@ -233,7 +245,7 @@ function PlayersTab() {
                     className="opacity-0 group-hover:opacity-100 text-destructive hover:text-destructive hover:bg-destructive/10 transition-all duration-200"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Löschen
+                    {t('delete', 'Löschen')}
                   </Button>
                 </li>
               ))}
@@ -246,7 +258,7 @@ function PlayersTab() {
           <div className="pt-4 border-t border-border">
             <p className="text-sm text-muted-foreground text-center">
               <span className="font-semibold text-primary">{players.length}</span>{' '}
-              {players.length === 1 ? 'Spieler' : 'Spieler'} registriert
+              {players.length === 1 ? t('player', 'Spieler') : t('players', 'Spieler')} {t('registered', 'registriert')}
             </p>
           </div>
         )}
@@ -257,6 +269,7 @@ function PlayersTab() {
 
 // --- TURNIER TAB ---
 function TournamentsTab() {
+  const { t } = useTranslation();
   const [tournaments, setTournaments] = useState([]);
   const [newTournament, setNewTournament] = useState({ 
     year: new Date().getFullYear(), 
@@ -264,7 +277,9 @@ function TournamentsTab() {
   });
   const [loading, setLoading] = useState(false);
 
-  const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+  const monthNames = [
+    t('january', 'Januar'), t('february', 'Februar'), t('march', 'März'), t('april', 'April'), t('may', 'Mai'), t('june', 'Juni'), t('july', 'Juli'), t('august', 'August'), t('september', 'September'), t('october', 'Oktober'), t('november', 'November'), t('december', 'Dezember')
+  ];
 
   const loadTournaments = async () => {
     const response = await fetchFromApi('/api/tournaments');
@@ -297,7 +312,7 @@ function TournamentsTab() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-2xl font-bold text-primary">
-            Turnier anlegen
+            {t('create_tournament', 'Turnier anlegen')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -322,7 +337,7 @@ function TournamentsTab() {
               disabled={loading}
               className="h-12 px-6 gap-2 font-semibold shadow-md hover:shadow-lg transition-all duration-200"
             >
-              {loading ? '...' : 'Erstellen'}
+              {loading ? '...' : t('create', 'Erstellen')}
             </Button>
           </div>
         </CardContent>
@@ -336,11 +351,11 @@ function TournamentsTab() {
                 onClick={() => handleDelete(t.id)}
                 className="bg-destructive text-white px-3 py-1 rounded hover:bg-red-500 text-xs"
               >
-                Löschen
+                {t('delete', 'Löschen')}
               </Button>
             </div>
             <div className="mt-2 text-sm">
-              <strong>Paarungen:</strong>
+              <strong>{t('pairings', 'Paarungen')}:</strong>
               <ul className="list-disc pl-5 mt-1">
                 {t.pairings?.map(p => <li key={p.id}>{p.player1_name} & {p.player2_name}</li>)}
               </ul>
@@ -354,6 +369,7 @@ function TournamentsTab() {
 
 // --- SPIELE TAB ---
 function GamesTab({ isActive }) {
+  const { t } = useTranslation();
   const [tournaments, setTournaments] = useState([]);
   const [selectedTournament, setSelectedTournament] = useState(null);
   const [games, setGames] = useState([]);
@@ -411,7 +427,7 @@ function GamesTab({ isActive }) {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-2xl font-bold text-primary">
-            Spiele & Ranking
+            {t('games_and_ranking', 'Spiele & Ranking')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -423,7 +439,7 @@ function GamesTab({ isActive }) {
             {tournaments.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
           </select>
           <div className="bg-secondary/30 rounded-xl p-4">
-            <h3 className="text-lg font-semibold mb-2">Ranking</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('ranking', 'Ranking')}</h3>
             <table className="w-full text-sm">
               <tbody>
                 {scores.map(s => (
@@ -438,7 +454,7 @@ function GamesTab({ isActive }) {
           <div className="space-y-6 mt-4">
             {[1, 2, 3].map(round => (
               <div key={round}>
-                <h3 className="text-base font-semibold border-b border-border mb-2">Runde {round}</h3>
+                <h3 className="text-base font-semibold border-b border-border mb-2">{t('round', 'Runde')} {round}</h3>
                 {games.filter(g => g.round_number === round).map(game => (
                   <Card key={game.id} className="mb-2">
                     <CardContent>
@@ -448,11 +464,11 @@ function GamesTab({ isActive }) {
                       <div className="flex gap-2">
                         {!game.winner_pairing_id ? (
                           <>
-                            <Button onClick={() => handleUpdateGame(game.id, game.pairing1_id)} className="flex-1 bg-primary text-white">Sieg P1</Button>
-                            <Button onClick={() => handleUpdateGame(game.id, game.pairing2_id)} className="flex-1 bg-primary text-white">Sieg P2</Button>
+                            <Button onClick={() => handleUpdateGame(game.id, game.pairing1_id)} className="flex-1 bg-primary text-white">{t('win_p1', 'Sieg P1')}</Button>
+                            <Button onClick={() => handleUpdateGame(game.id, game.pairing2_id)} className="flex-1 bg-primary text-white">{t('win_p2', 'Sieg P2')}</Button>
                           </>
                         ) : (
-                          <Button onClick={() => handleUpdateGame(game.id, null)} className="flex-1 bg-secondary border border-border">Reset</Button>
+                          <Button onClick={() => handleUpdateGame(game.id, null)} className="flex-1 bg-secondary border border-border">{t('reset', 'Reset')}</Button>
                         )}
                       </div>
                     </CardContent>
@@ -469,6 +485,7 @@ function GamesTab({ isActive }) {
 
 // --- STATISTIK TAB ---
 function StatisticsTab() {
+  const { t } = useTranslation();
   const [year, setYear] = useState(new Date().getFullYear());
   const [yearlyScores, setYearlyScores] = useState([]);
   useEffect(() => {
@@ -484,12 +501,12 @@ function StatisticsTab() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-3 text-2xl font-bold text-primary">
-            Jahresstatistik
+            {t('yearly_statistics', 'Jahresstatistik')}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="mb-4 flex items-center gap-2">
-            <label className="text-sm font-medium">Jahr:</label>
+            <label className="text-sm font-medium">{t('year', 'Jahr')}:</label>
             <input
               type="number"
               value={year}
@@ -502,8 +519,8 @@ function StatisticsTab() {
               <thead>
                 <tr className="bg-primary text-white">
                   <th className="py-2 px-4">#</th>
-                  <th className="py-2 px-4 text-left">Spieler</th>
-                  <th className="py-2 px-4">Pkt</th>
+                  <th className="py-2 px-4 text-left">{t('player', 'Spieler')}</th>
+                  <th className="py-2 px-4">{t('points', 'Pkt')}</th>
                 </tr>
               </thead>
               <tbody>
